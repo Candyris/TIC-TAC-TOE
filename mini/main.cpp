@@ -72,93 +72,51 @@ void printWinner(char won){
     }
 }
 
-bool updateboard(char swap_symbol, std::string println)
+bool updateboard(const char swap_symbol, const char* println)
 {
-    int posx, posy;
-    do{
-    std::cout << println;
-    std::cin >> posx >> posy;
-    if(board[posx - 1][posy - 1] == 'X' || board[posx - 1][posy - 1] == 'O'){
-    std::cout<<"invaild input !!\n\n";
-    }
-    }while((board[posx-1][posy-1] == 'X' || board[posx-1][posy-1] == 'O'));
+    struct Pos{int x,y;} pos;
 
-    board[posx - 1][posy - 1] = swap_symbol;
+    // TODO: Fix the out of bound later 
+    do
+    {
+        std::cout << println;
+        std::cin >> pos.x >> pos.y;
+        if(board[pos.x - 1][pos.y - 1] == 'X' || board[pos.x - 1][pos.y - 1] == 'O')
+            std::cout<<"invaild input !!\n\n";
 
-    return ((posx > 0 && posx < 4) && (posy > 0 && posy < 4)) ? true : false;
+    } while((board[pos.x-1][pos.y-1] == 'X' || board[pos.x-1][pos.y-1] == 'O'));
+
+    board[pos.x - 1][pos.y - 1] = swap_symbol;
+
+    return ((pos.x > 0 && pos.x < 4) && (pos.y > 0 && pos.y < 4)) ? true : false;
 }
 
 char checkWinner()
 {
-    // horizatal check for winner
-    int winnerO = 0;
-    int winnerX = 0;
-    for (int i = 0; i < 3; i++)
+    // Diagonal check for winner
+    const int boardSize = 3; 
+    struct Winner{int x,o;}  winnerCount{};
+    for (int i = 0; i < boardSize; i++)
     {
-        if (winnerO >= 3 || winnerX >= 3)
-        {
-            break;
-        }
-        winnerO = 0;
-        winnerX = 0;
-        for (int j = 0; j < 3; j++)
-        {
-            if (board[j][i] == 'X')
-            {
-                winnerX++;
-            }
-            if (board[j][i] == 'O')
-            {
-                winnerO++;
-            }   
-        }
-        if (winnerX == 3)
-            {
-                return 'X';
-            }
-        if (winnerO == 3)
-            {
-                return 'O';
-            }
-    }
-    
-    // vertcile check for winner
-    for (int i = 0; i < 3; i++)
-    {
-        if (winnerO >= 3 || winnerX >= 3)
-        {
-            break;
-        }
-        winnerO = 0;
-        winnerX = 0;
-        for (int j = 0; j < 3; j++)
-        {
-            if (board[i][j] == 'X')
-            {
-                winnerX++;
-            }
-            if (board[i][j] == 'O')
-            {
-                winnerO++;
-            }
-        }
-        if (winnerX == 3)
-            {
-                return 'X';
-            }
-            if (winnerO == 3)
-            {
-                return 'O';
-            }
-    }
-     // Diagonal check for winner
-    if ((board[0][0] == 'X' && board[1][1] == 'X' && board[2][2] == 'X') ||
-        (board[0][2] == 'X' && board[1][1] == 'X' && board[2][0] == 'X'))
-        return 'X';
-    if ((board[0][0] == 'O' && board[1][1] == 'O' && board[2][2] == 'O') ||
-        (board[0][2] == 'O' && board[1][1] == 'O' && board[2][0] == 'O'))
-        return 'O';
+        // For O
+        int hCount = 0;
+        // horizontal
+        for (int j = 0; j < 3; j++) if (board[i][j] == 'X' || board[j][boardSize - 1 - j] == 'X') hCount++;
+        if (board[i][i] == 'X' || board[i][boardSize - i - 1] == 'X') winnerCount.x++;
+        winnerCount.x = winnerCount.x <= hCount ? hCount : winnerCount.x;
+        
+        // For X 
+        hCount = 0;
+        for (int j = 0; j < 3; j++) if (board[i][j] == 'O' || board[j][boardSize - 1 - j] == 'O') hCount++;
+        if (board[i][i] == 'O' || board[i][boardSize - i - 1] == 'O') winnerCount.o++;
+        winnerCount.o = winnerCount.o <= hCount ? hCount : winnerCount.o;
 
+        // For Debug in future  
+        // std::cout << "X: " << winnerCount.x << ", O: " << winnerCount.o  << std::endl;
+    }
+    if (winnerCount.x == boardSize) return 'X';
+
+    if (winnerCount.o == boardSize) return 'O';
 
     return '!';
 }
@@ -166,8 +124,8 @@ char checkWinner()
 int main()
 {
     clearScreen();
-    std::cout << "Welcome to My own Tic-Tac-Toe Game !!\n";
-    std::cout << "\n Press Enter to continue ->";
+    std::cout << "Welcome to My own Tic-Tac-Toe Game !!\n"
+              << "\n Press Enter to continue ->";
     std::cin.get();
     clearScreen();
 
